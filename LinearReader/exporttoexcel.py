@@ -8,7 +8,7 @@ Created on Fri Feb  2 12:20:53 2018
 from PIL import Image
 import xlsxwriter
 ############################Output To Excel#######################################
-def exportToexcel(data_dict, directory ,title = 'Test'):
+def exportToexcel(data_dict,data_table, directory ,title = 'Test'):
     file_name = title + '.xlsx'
     workbook = xlsxwriter.Workbook(directory+'\\'+file_name)
     variable_format = workbook.add_format({'bold':1,'border':1,'align':'center','valign':'vcenter'})
@@ -53,6 +53,18 @@ def exportToexcel(data_dict, directory ,title = 'Test'):
             datapoints.write(row,col+2,point)
             row += 1
         col += 3
+    dataTable = workbook.add_worksheet('Data Table')
+    row = 0
+    col = 0
+    for key in data_table:
+        row = 0
+        dataTable.write(row,col,key,variable_format)
+        row += 1
+        for points in data_table[key]:
+            dataTable.write(row,col,points,variable_format)
+            row += 1
+        col += 1
+        
     workbook.close()
         
     

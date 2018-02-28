@@ -5,7 +5,7 @@ Created on Thu Jan 25 08:13:57 2018
 @author: scott.downard
 """
 import os
-from scipy.signal import filtfilt, butter
+from scipy.signal import filtfilt
 import struct
 import numpy as np
 
@@ -71,8 +71,11 @@ def fileRead(directory):
     filelist = []
     totaldata_dic = {}
     for root, dirs, files in os.walk(directory):
+        
         for filenames in files:
+            files.sort()
             filename , file_extension = os.path.splitext(filenames)
+
             if filename == 'H0HEAD000000ACX0' or filename == 'H0HEAD000000DSX0':
                 filedir = os.path.join(root,filenames)
                 if int(file_extension.strip('.')) in filelist:
@@ -128,11 +131,16 @@ def tableCalc(accel,disp,time):
     contact_index = []
     
     for accellist in accel:
+        accellist = accellist.tolist()
         maxAccel.append(min(accellist))
-        for i in reversed(accellist):      
+        max_index = accellist.index(min(accellist))
+        
+        count = 0
+        
+        for i in reversed(accellist[0:max_index]):
             if i < -2.00:
                 if round(i,1) == -2.00:
-                    contact_index.append(np.array(np.where(accellist == i)))                   
+                    contact_index.append(accellist.index(i))                   
                     break
         
     for displist in disp:
@@ -140,7 +148,7 @@ def tableCalc(accel,disp,time):
     count = 0
     for timelist in time:
         i = contact_index[count]
-        contTime.append(time.item(i))
+        contTime.append(timelist[i])
         count += 1
 
     return(maxAccel,maxDisp,contTime) 
