@@ -11,13 +11,12 @@ import Mainwindow
 from LinearReader import *
 from exporttoexcel import *
 from bokeh.plotting import figure, output_file, show
-from bokeh.layouts import column, row, gridplot, widgetbox, layout
-from bokeh.models import Legend, ColumnDataSource, HoverTool
+
+from bokeh.models import Legend, ColumnDataSource
 from bokeh.models.widgets import Panel, Tabs, DataTable, TableColumn
 import bokeh.io as bk
 import bokeh.plotting
-import numpy as np
-import pandas as pd
+
 class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
 
     
@@ -25,12 +24,13 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         filterlist = ['Raw','60','180']
         super(LinearApp, self).__init__(parent)
         self.setupUi(self)
-        self.tableWidget.setColumnCount(2)
-        self.tableWidget.setHorizontalHeaderLabels(['Test Name','Group #'])
+        self.tableWidget.setColumnCount(3)
+        
         self.filterBox.addItems(filterlist)
         self.openFile.clicked.connect(self.browse_folder)
         self.graphbtn.clicked.connect(self.graph)
         self.export_2.clicked.connect(self.exportexcel)
+        
     def browse_folder(self):
 #        self.listWidget.clear()
         
@@ -38,30 +38,36 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         if self.directory:
             self.tableWidget.clear()
             self.test_list = []
+            
             group_list = []
             self.data_dict = fileRead(self.directory)            
             for keys in self.data_dict:
                 self.test_list.append(keys)
-             
+            self.colorList = ['#000000' for x in range(len(self.test_list))]
             for i in range(len(self.test_list)):
                 group_list.append(str(i+1))
             self.tableWidget.setRowCount(len(self.test_list))
-            i = 0
-            color_list = ['black','red','blue','green','purple','grey','orange',
-              'yellow','darkgreen','magenta','gold','aquamarine']            
+            self.tableWidget.setHorizontalHeaderLabels(['Test Name','Group #','Line Color'])
+            i = 0         
             for k in self.test_list:
                 self.tableWidget.setItem(i,0,QtWidgets.QTableWidgetItem("Test_"+str(k))) 
                 comboBox = QtWidgets.QComboBox()                                   
                 comboBox.addItems(group_list)
                 comboBox.setCurrentIndex(i)
                 self.tableWidget.setCellWidget(i,1,comboBox) 
-                
+                self.btncolor = QtWidgets.QPushButton()
+                self.btncolor.clicked.connect(self.clickedColor)
+                self.btncolor.setStyleSheet("background-color: black")
+                self.tableWidget.setCellWidget(i,2,self.btncolor)
                 i +=1
  
     def clickedColor(self):
         button = QtWidgets.qApp.focusWidget()
         color = QtWidgets.QColorDialog.getColor()
         button.setStyleSheet("QWidget { background-color: %s}" % color.name())
+        index = self.tableWidget.indexAt(button.pos())
+        self.colorList[index.row()] = color.name()
+
         
     def exportexcel(self):
         i = 0
@@ -77,8 +83,6 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             
             group_list = []
             self.test_name = []
-            color_list = ['black','red','blue','green','purple','grey','orange',
-              'yellow','darkgreen','magenta','gold','aquamarine']
             group_color = []
             filtersize = self.filterBox.currentText()
             plotTitle = self.titlebox.text()
@@ -88,8 +92,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             self.final_data = {i:group_list.count(i) for i in group_list}
             for key in self.final_data:
                 self.final_data[key] = {}
-            for i in group_list:
-                group_color.append(color_list[int(i)])
+
             for i in range(len(self.test_list)):
                 if filtersize == 'Raw':
                     continue
@@ -114,13 +117,13 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             
             maxAccel, maxDisp, contTime = tableCalc(accel_list,disp_list,time_list)
 #            output_file(plotTitle + '.html')
-            p1 = figure(width = 1200, height = 450, title = plotTitle)
-            p2 = figure(width = 1200, height = 450, title = plotTitle)
+            p1 = figure(width = 1200, height = 600, title = plotTitle)
+            p2 = figure(width = 1200, height = 600, title = plotTitle)
             legend_set1 = []
             legend_set2 = []
             for i in range(len(accel_list)):
-                a = p1.line(disp_list[i],accel_list[i],line_color = group_color[i], alpha = 1, muted_color = group_color[i],muted_alpha=0)
-                b = p2.line(time_list[i],accel_list[i],line_color = group_color[i], alpha = 1, muted_color = group_color[i],muted_alpha=0)
+                a = p1.line(disp_list[i],accel_list[i],line_color = self.colorList[i], line_width = 4, alpha = 1, muted_color = self.colorList[i],muted_alpha=0)
+                b = p2.line(time_list[i],accel_list[i],line_color = self.colorList[i], line_width = 5, alpha = 1, muted_color = self.colorList[i],muted_alpha=0)
                 legend_set1.append((self.test_name[i],[a]))
                 legend_set2.append((self.test_name[i],[b]))
                 
