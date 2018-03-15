@@ -31,8 +31,8 @@ def finalDict(directory):
         xdc = textfilestr.find('XDCRSENS')     #Used to find grab the correct number of points in datapoint line
         cr = textfilestr.find('CLOCK_RATE')    #Sample rate
         ss = textfilestr.find('SUBSAMP_SKIP')  #Used to grab correct number of points in Sample Rate
-
-    
+        name = textfilestr.find('Sample')      #Reads BuildSheet Number
+        
         startdict['VertScale'] = float(textfilestr[vs+10:vo - 1])
         startdict['VertOffset'] = float(textfilestr[vo+11:vu - 1])
         startdict['VertUnits'] = textfilestr[vu+10:hs - 1]
@@ -119,10 +119,7 @@ def filterProcessing(data_frame,CFC,sample_rate):
 #    b,a = butter(2,wn,'low')
     y = filtfilt(b,a,data_frame)
     return y
-def truntozero (data):
-    idx1 = (np.abs(data-0)).argmin()
-    del data[0:idx1]  
-    return data
+
 
 def tableCalc(accel,disp,time):
     maxAccel = []
