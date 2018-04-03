@@ -33,12 +33,15 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
 #        self.listWidget.clear()
         
         self.directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Pick a Folder")
+#        directory = QtWidgets.QFileDialog.getOpenFileNames(self,'Select Files to Open')
+        
         if self.directory:
             self.tableWidget.clear()
             self.test_list = []
             
             group_list = []
-            self.data_dict = fileRead(self.directory)            
+            self.data_dict = fileRead(self.directory)
+#            self.data_dict.update(readFiles(directory))
             for keys in self.data_dict:
                 self.test_list.append(keys)
             self.colorList = ['#000000' for x in range(len(self.test_list))]
@@ -131,8 +134,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             p1.legend.padding = 1
             p1.xaxis.axis_label = "Displacement (mm)"
             p1.yaxis.axis_label = "Acceleration (g)"
-            p1.xaxis.axis_label = "Displacement (mm)"
-            p1.yaxis.axis_label = "Acceleration (g)"
+
 
             tab1 = Panel(child=p1, title='Accel vs Disp')            
             
