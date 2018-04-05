@@ -122,8 +122,8 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             legend_set2 = []
             
             for i in range(len(accel_list)):
-                a = p1.line(disp_list[i],accel_list[i],line_color = self.colorList[i], line_width = 4, alpha = 1, muted_color = self.colorList[i],muted_alpha=0)
-                b = p2.line(time_list[i],accel_list[i],line_color = self.colorList[i], line_width = 5, alpha = 1, muted_color = self.colorList[i],muted_alpha=0)
+                a = p1.line(disp_list[i],accel_list[i],line_color = self.colorList[i], line_width = 4, alpha = 1, muted_color = self.colorList[i],muted_alpha=0,hover_line_color = self.colorList[i],hover_line_alpha = 1.0)
+                b = p2.line(time_list[i],accel_list[i],line_color = self.colorList[i], line_width = 5, alpha = 1, muted_color = self.colorList[i],muted_alpha=0,hover_line_color = self.colorList[i],hover_line_alpha = 1.0)
                 legend_set1.append((self.test_name[i],[a]))
                 legend_set2.append((self.test_name[i],[b]))
                 
