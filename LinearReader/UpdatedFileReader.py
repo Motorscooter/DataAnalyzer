@@ -12,7 +12,7 @@ import numpy as np
 
 
 def fileRead(directory):
-    inflatorData = {}
+    linearData = {}
     for root, dirs, files in os.walk(directory):
         
         for file in files:
@@ -82,9 +82,9 @@ def fileRead(directory):
                     timecount += filedict[name]['HorzScale']
                 filedict[name][datatype]['XData'] = time
             fup.close()
-            inflatorData.update(filedict)
+            linearData.update(filedict)
 # =============================================================================    
-    return inflatorData
+    return linearData
 
 # =============================================================================
 # Filter Data using SAE filter standards
