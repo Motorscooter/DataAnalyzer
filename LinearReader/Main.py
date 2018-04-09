@@ -111,14 +111,14 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                 filtersize = self.filterBox.currentText()
                 plotTitle = self.titlebox.text()
                 for i in range(len(self.test_list)):
-                    group_list.append(self.tableWidget.cellWidget(i,2).currentText())
+                    group_list.append(self.tableWidget.cellWidget(i,1).currentText())
 
                 if filtersize != 'Raw':
                     for key in self.data_dict:
-                        self.data_dict[key]['Acceleration']['YData'] = filterProcessing(self.data_dict[key]['RawYData'],int(filtersize),self.data_dict[key]['Sample Rate'])
+                        self.data_dict[key]['Acceleration']['YData'] = filterProcessing(self.data_dict[key]['Acceleration']['RawYData'],int(filtersize),self.data_dict[key]['Acceleration']['Sample Rate'])
                 else:
                     for key in self.data_dict:
-                        self.data_dict[key]['Acceleration']['YData'] = self.data_dict[key]['RawYData']
+                        self.data_dict[key]['Acceleration']['YData'] = self.data_dict[key]['Acceleration']['RawYData']
                 
 # =============================================================================
 # If user checks acceleration vs displacement

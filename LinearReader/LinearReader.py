@@ -21,14 +21,18 @@ def fileRead(directory):
                 file_ext = int(file_ext)
             except ValueError:
                 continue
-            if "CU0" in file:
+            if "CU0" in filename:
                 datatype = "Current"
-            elif "VO0" in file:
+                print("C Ping")
+            elif "VO0" in filename:
                 datatype = "Voltage"
-            elif "ACX" in file:
+
+            elif "ACX" in filename:
                 datatype = "Acceleration"
-            elif "DSX" in file:
+                print("A Ping")
+            elif "DSX" in filename:
                 datatype = "Displacement"
+                print("D Ping")
             filedict = {}
             new_float_data = []
             new_data = []
@@ -56,24 +60,24 @@ def fileRead(directory):
                 name_end = textfilestr.find('InflatorID')
                 name = str(textfilestr[name_start+7:name_end-1])
                 filedict[name] = {}
-                
-                filedict[name]['VertScale'] = float(textfilestr[vs+10:vo - 1])
-                filedict[name]['VertOffset'] = float(textfilestr[vo+11:vu - 1])
-                filedict[name]['VertUnits'] = textfilestr[vu+10:hs - 1]
-                filedict[name]['HorzScale'] = float(textfilestr[hs+10:hups - 1])
-                filedict[name]['HorzUnitsPerSec'] = float(textfilestr[hups+12:ho - 1])
-                filedict[name]['HorzOffset'] = float(textfilestr[ho+11:hu - 1])
-                filedict[name]['HorzUnits'] = (textfilestr[hu+10:rl - 1])
-                filedict[name]['NumofPoints'] = int(textfilestr[rl+7:xdc-1])
-                filedict[name]['Sample Rate'] = float(textfilestr[cr+11:ss-1])
+                filedict[name][datatype] = {}
+                filedict[name][datatype]['VertScale'] = float(textfilestr[vs+10:vo - 1])
+                filedict[name][datatype]['VertOffset'] = float(textfilestr[vo+11:vu - 1])
+                filedict[name][datatype]['VertUnits'] = textfilestr[vu+10:hs - 1]
+                filedict[name][datatype]['HorzScale'] = float(textfilestr[hs+10:hups - 1])
+                filedict[name][datatype]['HorzUnitsPerSec'] = float(textfilestr[hups+12:ho - 1])
+                filedict[name][datatype]['HorzOffset'] = float(textfilestr[ho+11:hu - 1])
+                filedict[name][datatype]['HorzUnits'] = (textfilestr[hu+10:rl - 1])
+                filedict[name][datatype]['NumofPoints'] = int(textfilestr[rl+7:xdc-1])
+                filedict[name][datatype]['Sample Rate'] = float(textfilestr[cr+11:ss-1])
                 filedict[name]['Color'] = '#000000'
             fup.close()            
     # =============================================================================
     # =============================================================================
     # The file is closed and then opened to read binary data.
             with open(filepath, 'rb') as fup:
-                filedict[name][datatype] = {}
-                datacount = filedict[name]['NumofPoints']
+                
+                datacount = filedict[name][datatype]['NumofPoints']
                 filedict[name][datatype]['RawYData'] = {}            
                 size = fup.read()
                 data = struct.unpack('h'*datacount,size[len(size)-(datacount*2):])
@@ -81,12 +85,12 @@ def fileRead(directory):
                 for i in list_data:
                     new_float_data.append(float(i))
                 for i in new_float_data:
-                    new_data.append(i *  filedict[name]['VertScale'] + filedict[name]['VertOffset'])
+                    new_data.append(i *  filedict[name][datatype]['VertScale'] + filedict[name][datatype]['VertOffset'])
                 filedict[name][datatype]['RawYData'] = new_data
-                timecount = filedict[name]['HorzOffset']           
-                for i in range(0,filedict[name]['NumofPoints']):
+                timecount = filedict[name][datatype]['HorzOffset']           
+                for i in range(0,filedict[name][datatype]['NumofPoints']):
                     time.append(timecount)
-                    timecount += filedict[name]['HorzScale']
+                    timecount += filedict[name][datatype]['HorzScale']
                 filedict[name][datatype]['XData'] = time
             fup.close()
             linearData.update(filedict)
