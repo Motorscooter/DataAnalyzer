@@ -105,6 +105,9 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                 bokehTabs = []
                 avgDict = {}
                 testLen = len(self.data_dict.keys())
+                for keys in self.data_dict:
+                   
+                    print(self.data_dict[keys].keys())
                 for i in range(testLen):
                     self.data_dict[self.tableWidget.item(i,0).text()]['Title'] = self.tableWidget.item(i,0).text()
                     self.data_dict[self.tableWidget.item(i,0).text()]['Group'] = int(self.tableWidget.cellWidget(i,1).currentText())
@@ -126,7 +129,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     avd = figure(width = 1200, height = 600, title = plotTitle)
                     avdLegend = []
                     for key in self.data_dict:
-                        accelvdisp = avd.line(self.data_dict[key]['Displacement']['RawYdata'],self.data_dict[key]['Acceleration']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        accelvdisp = avd.line(self.data_dict[key]['Displacement']['RawYData'],self.data_dict[key]['Acceleration']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         avdLegend.append((self.data_dict[key]['Title'],[accelvdisp]))
                     avdLegend = Legend(items = avdLegend, location=(0,0))
                     avdLegend.click_policy = "mute"
@@ -166,7 +169,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     cur = figure(width = 1200, height = 600, title = plotTitle)
                     curLegend = []
                     for key in self.data_dict:
-                        current = avt.line(self.data_dict[key]['Current']['Xdata'],self.data_dict[key]['Current']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        current = avt.line(self.data_dict[key]['Current']['Xdata'],self.data_dict[key]['Current']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         curLegend.append((self.data_dict[key]['Title'],[current]))
                     curLegend = Legend(items = curLegend, location=(0,0))
                     curLegend.click_policy = "mute"
@@ -184,7 +187,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     vol = figure(width = 1200, height = 600, title = plotTitle)
                     volLegend = []
                     for key in self.data_dict:
-                        voltage = vol.line(self.data_dict[key]['Voltage']['Xdata'],self.data_dict[key]['Voltage']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        voltage = vol.line(self.data_dict[key]['Voltage']['Xdata'],self.data_dict[key]['Voltage']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         volLegend.append((self.data_dict[key]['Title'],[voltage]))
                     volLegend = Legend(items = volLegend, location=(0,0))
                     volLegend.click_policy = "mute"

@@ -12,6 +12,7 @@ import numpy as np
 
 def fileRead(directory):
     linearData = {}
+    filedict = {}
     for root, dirs, files in os.walk(directory):
         
         for file in files:
@@ -23,17 +24,17 @@ def fileRead(directory):
                 continue
             if "CU0" in filename:
                 datatype = "Current"
-                print("C Ping")
+
             elif "VO0" in filename:
                 datatype = "Voltage"
 
             elif "ACX" in filename:
                 datatype = "Acceleration"
-                print("A Ping")
+
             elif "DSX" in filename:
                 datatype = "Displacement"
-                print("D Ping")
-            filedict = {}
+
+            
             new_float_data = []
             new_data = []
             time = []
@@ -59,7 +60,11 @@ def fileRead(directory):
                 name_start = textfilestr.find('Sample')#Reads BuildSheet Number
                 name_end = textfilestr.find('InflatorID')
                 name = str(textfilestr[name_start+7:name_end-1])
-                filedict[name] = {}
+                if name in filedict.keys():
+                    pass
+                    
+                else:
+                    filedict[name] = {}                
                 filedict[name][datatype] = {}
                 filedict[name][datatype]['VertScale'] = float(textfilestr[vs+10:vo - 1])
                 filedict[name][datatype]['VertOffset'] = float(textfilestr[vo+11:vu - 1])
