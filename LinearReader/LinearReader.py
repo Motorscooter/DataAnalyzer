@@ -264,7 +264,7 @@ def tableCalc(accel,disp,time):
     
     for accellist in accel:
         accellist = accellist.tolist()
-        maxAccel.append(min(accellist))
+        maxAccel.append(round(min(accellist),3))
         max_index = accellist.index(min(accellist))
         
         count = 0
@@ -272,15 +272,16 @@ def tableCalc(accel,disp,time):
         for i in reversed(accellist[0:max_index]):
             if i < -2.00:
                 if round(i,1) == -2.00:
+                    
                     contact_index.append(accellist.index(i))                   
                     break
         
     for displist in disp:
-        maxDisp.append(max(displist))
+        maxDisp.append(round(max(displist),3))
     count = 0
     for timelist in time:
         i = contact_index[count]
-        contTime.append(timelist[i])
+        contTime.append(round(timelist[i],3))
         count += 1
 
     return(maxAccel,maxDisp,contTime) 

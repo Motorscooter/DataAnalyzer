@@ -77,7 +77,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         color = QtWidgets.QColorDialog.getColor()
         button.setStyleSheet("QWidget { background-color: %s}" % color.name())
         index = self.tableWidget.indexAt(button.pos())
-        self.colorList[index.row()] = color.name()
+        self.data_dict[self.tableWidget.item(index.row(),0).text()]['Color'] = color.name()
 #Delete unwanted files from dictionary. (Not from folder)        
     def deleteData(self):
         button = QtWidgets.qApp.focusWidget()
@@ -101,35 +101,43 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         directory = QtWidgets.QFileDialog.getSaveFileName(self,"Select Where to Save")
         if directory:
             if self.data_dict:
+                for keys in self.data_dict:
+                    print(self.data_dict[keys]['Color'])
                 group_list = []
                 bokehTabs = []
                 avgDict = {}
+                testName =[]
                 testLen = len(self.data_dict.keys())
+                k = 0
                 for keys in self.data_dict:
-                   
-                    print(self.data_dict[keys].keys())
+                    if keys != self.tableWidget.item(k,0).text():                     
+                       self.data_dict[self.tableWidget.item(k,0).text()] = self.data_dict.pop(keys)
+                       
+                    k+=1
                 for i in range(testLen):
                     self.data_dict[self.tableWidget.item(i,0).text()]['Title'] = self.tableWidget.item(i,0).text()
                     self.data_dict[self.tableWidget.item(i,0).text()]['Group'] = int(self.tableWidget.cellWidget(i,1).currentText())
                 filtersize = self.filterBox.currentText()
                 plotTitle = self.titlebox.text()
+                for key in self.data_dict:
+                    testName.append(key)
                 for i in range(len(self.test_list)):
                     group_list.append(self.tableWidget.cellWidget(i,1).currentText())
 
                 if filtersize != 'Raw':
                     for key in self.data_dict:
-                        self.data_dict[key]['Acceleration']['YData'] = filterProcessing(self.data_dict[key]['Acceleration']['RawYData'],int(filtersize),self.data_dict[key]['Acceleration']['Sample Rate'])
-                else:
-                    for key in self.data_dict:
-                        self.data_dict[key]['Acceleration']['YData'] = self.data_dict[key]['Acceleration']['RawYData']
-                
+                        self.data_dict[key]['Acceleration']['RawYData'] = filterProcessing(self.data_dict[key]['Acceleration']['RawYData'],int(filtersize),self.data_dict[key]['Acceleration']['Sample Rate'])
+#                else:
+#                    for key in self.data_dict:
+#                        self.data_dict[key]['Acceleration']['YData'] = self.data_dict[key]['Acceleration']['RawYData']
+                output_file(directory[0]+'.html')
 # =============================================================================
 # If user checks acceleration vs displacement
                 if self.accelvdisp.isChecked():
                     avd = figure(width = 1200, height = 600, title = plotTitle)
                     avdLegend = []
                     for key in self.data_dict:
-                        accelvdisp = avd.line(self.data_dict[key]['Displacement']['RawYData'],self.data_dict[key]['Acceleration']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        accelvdisp = avd.line(self.data_dict[key]['Displacement']['RawYData'],self.data_dict[key]['Acceleration']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         avdLegend.append((self.data_dict[key]['Title'],[accelvdisp]))
                     avdLegend = Legend(items = avdLegend, location=(0,0))
                     avdLegend.click_policy = "mute"
@@ -147,16 +155,16 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     avt = figure(width = 1200, height = 600, title = plotTitle)
                     avtLegend = []
                     for key in self.data_dict:
-                        accelvtime = avt.line(self.data_dict[key]['Acceleration']['Xdata'],self.data_dict[key]['Acceleration']['YData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        accelvtime = avt.line(self.data_dict[key]['Acceleration']['XData'],self.data_dict[key]['Acceleration']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         avtLegend.append((self.data_dict[key]['Title'],[accelvtime]))
-                    avtLegend = Legend(items = avdLegend, location=(0,0))
+                    avtLegend = Legend(items = avtLegend, location=(0,0))
                     avtLegend.click_policy = "mute"
-                    avt.add_layout(avdLegend,'right')
+                    avt.add_layout(avtLegend,'right')
                     avt.legend.orientation = "vertical"
                     avt.legend.padding = 1
-                    avt.xaxis.axis_label = "Displacement (mm)"
+                    avt.xaxis.axis_label = "Time (mSec)"
                     avt.yaxis.axis_label = "Acceleration (g's)"
-                    avtTab = Panel(child=avt, title="Acceleration vs. Displacement")
+                    avtTab = Panel(child=avt, title="Acceleration vs. Time")
                     bokehTabs.append(avtTab)                    
 # =============================================================================
 # =============================================================================
@@ -169,15 +177,15 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     cur = figure(width = 1200, height = 600, title = plotTitle)
                     curLegend = []
                     for key in self.data_dict:
-                        current = avt.line(self.data_dict[key]['Current']['Xdata'],self.data_dict[key]['Current']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        current = cur.line(self.data_dict[key]['Current']['XData'],self.data_dict[key]['Current']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         curLegend.append((self.data_dict[key]['Title'],[current]))
                     curLegend = Legend(items = curLegend, location=(0,0))
                     curLegend.click_policy = "mute"
-                    cur.add_layout(avdLegend,'right')
+                    cur.add_layout(curLegend,'right')
                     cur.legend.orientation = "vertical"
                     cur.legend.padding = 1
-                    cur.xaxis.axis_label = "Displacement (mm)"
-                    cur.yaxis.axis_label = "Acceleration (g's)"
+                    cur.xaxis.axis_label = "Time (mSec)"
+                    cur.yaxis.axis_label = "Current (A)"
                     curTab = Panel(child=cur, title="Current vs. Time")
                     bokehTabs.append(curTab)                      
 # =============================================================================                
@@ -187,15 +195,15 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     vol = figure(width = 1200, height = 600, title = plotTitle)
                     volLegend = []
                     for key in self.data_dict:
-                        voltage = vol.line(self.data_dict[key]['Voltage']['Xdata'],self.data_dict[key]['Voltage']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        voltage = vol.line(self.data_dict[key]['Voltage']['XData'],self.data_dict[key]['Voltage']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
                         volLegend.append((self.data_dict[key]['Title'],[voltage]))
                     volLegend = Legend(items = volLegend, location=(0,0))
                     volLegend.click_policy = "mute"
-                    vol.add_layout(avdLegend,'right')
+                    vol.add_layout(volLegend,'right')
                     vol.legend.orientation = "vertical"
                     vol.legend.padding = 1
-                    vol.xaxis.axis_label = "Displacement (mm)"
-                    vol.yaxis.axis_label = "Acceleration (g's)"
+                    vol.xaxis.axis_label = "Time (mSec)"
+                    vol.yaxis.axis_label = "Voltage (V)"
                     volTab = Panel(child=vol, title="Voltage vs. Time")
                     bokehTabs.append(volTab)
 # =============================================================================
@@ -203,48 +211,72 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     avgDict = {}
                     for key in self.data_dict:
                         if self.data_dict[key]['Group'] in avgDict:
-                          avgDict[self.data_dict[key]['Group']]['XGData'].append(self.data_dict[key]['XData'])
-                          avgDict[self.data_dict[key]['Group']]['YGData'].append(self.data_dict[key]['YData'])
+                          avgDict[self.data_dict[key]['Group']]['AverageDisp'].append(self.data_dict[key]['Displacement']['RawYData'])
+                          avgDict[self.data_dict[key]['Group']]['AverageAccel'].append(self.data_dict[key]['Acceleration']['RawYData'])
+                          avgDict[self.data_dict[key]['Group']]['AverageTime'].append(self.data_dict[key]['Acceleration']['XData'])
                         else:
                           avgDict[self.data_dict[key]['Group']] = {}
-                          avgDict[self.data_dict[key]['Group']]['XGData'] = []
-                          avgDict[self.data_dict[key]['Group']]['YGData'] = []
+                          avgDict[self.data_dict[key]['Group']]['AverageDisp'] = []
+                          avgDict[self.data_dict[key]['Group']]['AverageAccel'] = []
+                          avgDict[self.data_dict[key]['Group']]['AverageTime'] = []
                           avgDict[self.data_dict[key]['Group']]['Title'] = self.data_dict[key]['Title']
                           avgDict[self.data_dict[key]['Group']]['Color'] = self.data_dict[key]['Color']
-                          avgDict[self.data_dict[key]['Group']]['XGData'].append(self.data_dict[key]['XData'])
-                          avgDict[self.data_dict[key]['Group']]['YGData'].append(self.data_dict[key]['YData'])
-                          avgDict[self.data_dict[key]['Group']]['Points'] = self.data_dict[key]['NumofPoints']
-                    avgsumx = 0
-                    avgsumy = 0
+                          avgDict[self.data_dict[key]['Group']]['AverageDisp'].append(self.data_dict[key]['Displacement']['XData'])
+                          avgDict[self.data_dict[key]['Group']]['AverageAccel'].append(self.data_dict[key]['Acceleration']['RawYData'])
+                          avgDict[self.data_dict[key]['Group']]['AverageTime'].append(self.data_dict[key]['Acceleration']['XData'])
+                          avgDict[self.data_dict[key]['Group']]['Points'] = self.data_dict[key]['Acceleration']['NumofPoints']
+                    avgsumd = 0
+                    avgsuma = 0
+                    avgsumt = 0
                     for key in avgDict:
-                        avgDict[key]['avgY'] = []
-                        avgDict[key]['avgX'] = []
+                        avgDict[key]['avgDisp'] = []
+                        avgDict[key]['avgAccel'] = []
+                        avgDict[key]['avgTime'] = []
                         for i in range(avgDict[key]['Points']):
-                            for axist in avgDict[key]['XGData']:
-                                avgsumx += axist[i]
-                            for ayist in avgDict[key]['YGData']:
-                                avgsumy += ayist[i]
-                            avgx = avgsumx/len(avgDict[key]['XGData'])
-                            avgy = avgsumy/len(avgDict[key]['YGData'])
-                            avgDict[key]['avgY'].append(avgy)
-                            avgDict[key]['avgX'].append(avgx)                        
-                            avgsumx = 0
-                            avgsumy = 0
+                            for avdispist in avgDict[key]['AverageDisp']:
+                                avgsumd += avdispist[i]
+                            for avaccist in avgDict[key]['AverageAccel']:
+                                avgsuma += avaccist[i]
+                            for avtimist in avgDict[key]['AverageTime']:
+                                avgsumt += avtimist[i]
+                            avgd = avgsumd/len(avgDict[key]['AverageDisp'])
+                            avga = avgsuma/len(avgDict[key]['AverageAccel'])
+                            avgt = avgsumt/len(avgDict[key]['AverageTime'])
+                            avgDict[key]['avgDisp'].append(avgd)
+                            avgDict[key]['avgAccel'].append(avga)
+                            avgDict[key]['avgTime'].append(avgt)
+                            avgsumd = 0
+                            avgsuma = 0
+                            avgsumt = 0
 
-                    avg = figure(width = 1200, height = 600, title = 'Average' + plotTitle)
-                    legendSet = []
+                    avgavd = figure(width = 1200, height = 600, title = 'Average Acceleration vs. Displacement')
+                    avgavt = figure(width = 1200, height = 600, title = 'Average Acceleration vs. Time')
+                    legendAVT = []
+                    legendAVD = []
                     for key in avgDict:
-                         b = avg.line(avgDict[key]['avgX'],avgDict[key]['avgY'],line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
-                         legendSet.append((avgDict[key]['Title'],[b]))
-                    legend = Legend(items = legendSet, location=(0,0))
-                    legend.click_policy = "mute"
-                    avg.add_layout(legend,'right')   
-                    avg.legend.orientation = "vertical"
-                    avg.legend.padding = 1
-                    avg.xaxis.axis_label = "Time (mSec)"
-                    avg.yaxis.axis_label = "Pressure (" + units +")"
-                    avgTab =  Panel(child=avg, title='Average '+ plotTitle)
-                    bokehTabs.append(avgTab)
+                         a = avgavt.line(avgDict[key]['avgTime'],avgDict[key]['avgAccel'],line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
+                         b = avgavd.line(avgDict[key]['avgDisp'],avgDict[key]['avgAccel'],line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
+                         legendAVT.append((avgDict[key]['Title'],[a]))
+                         legendAVD.append((avgDict[key]['Title'],[b]))
+                    Tlegend = Legend(items = legendAVT, location=(0,0))
+                    Tlegend.click_policy = "mute"
+                    avgavt.add_layout(Tlegend,'right')   
+                    avgavt.legend.orientation = "vertical"
+                    avgavt.legend.padding = 1
+                    avgavt.xaxis.axis_label = "Time (mSec)"
+                    avgavt.yaxis.axis_label = "Acceleration (g's)"
+                    avgTTab =  Panel(child=avgavt, title='Average Acceleration vs. Time')
+                    bokehTabs.append(avgTTab)
+                    
+                    Dlegend = Legend(items = legendAVD, location=(0,0))
+                    Dlegend.click_policy = "mute"
+                    avgavd.add_layout(Dlegend,'right')   
+                    avgavd.legend.orientation = "vertical"
+                    avgavd.legend.padding = 1
+                    avgavd.xaxis.axis_label = "Displacement (mm)"
+                    avgavd.yaxis.axis_label = "Acceleration (g's)"
+                    avgDTab =  Panel(child=avgavd, title='Average Acceleration vs. Displacement')
+                    bokehTabs.append(avgDTab)
                     
 # =============================================================================
 # If user selects data table
@@ -258,11 +290,11 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     #Create a variable for the sample rate of the build sheet.
                     for key in self.data_dict:
                         test_list.append(key)
-                        accel_list.append((self.data_dict[key]['Acceleration']['Data']))
-                        disp_list.append((self.data_dict[key]['Displacement']['Data']))
-                        time_list.append((self.data_dict[key]['Acceleration']['Time']))
+                        accel_list.append((self.data_dict[key]['Acceleration']['RawYData']))
+                        disp_list.append((self.data_dict[key]['Displacement']['RawYData']))
+                        time_list.append((self.data_dict[key]['Acceleration']['XData']))
                     maxAccel, maxDisp, contTime = tableCalc(accel_list,disp_list,time_list)           
-                    self.data = dict(testnum = self.test_name,                                               
+                    self.data = dict(testnum = testName,                                               
                         max_accel = maxAccel,
                         max_displacment = maxDisp,
                         contact_time = contTime)
@@ -278,7 +310,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
 # =============================================================================
                 tabs = Tabs(tabs = bokehTabs)
                 show(tabs)
-                output_file(directory[0]+'.html')
+                
                 
 def main():
     app = QtWidgets.QApplication(sys.argv)
