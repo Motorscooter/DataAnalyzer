@@ -30,7 +30,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
 #        self.export_2.clicked.connect(self.exportexcel)
         self.data_dict = {}        
     def browse_folder(self):
-#        self.listWidget.clear()
+
         
         self.directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Pick a Folder")        
         if self.directory:
