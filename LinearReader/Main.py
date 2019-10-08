@@ -28,33 +28,38 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         self.openFile.clicked.connect(self.browse_folder)
         self.graphbtn.clicked.connect(self.report)
 #        self.export_2.clicked.connect(self.exportexcel)
-        self.data_dict = {}        
-    def browse_folder(self):
+        self.tableWidget.cellChanged.connect(self.titleUpdate)
+        self.data_dict = {}
 
-        
+    def browse_folder(self):
         self.directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Pick a Folder")        
         if self.directory:
             self.tableWidget.clear()
             self.test_list = []
             tempdict = {}
             group_list = []
+
             tempdict = fileRead(self.directory)
-            for key in tempdict:
-                if key in self.data_dict.keys():
-                    self.data_dict[key] = tempdict[key]
-                    tempdict.pop(key,None)
+            # for key in tempdict:
+            #     if key in self.data_dict.keys():
+            #         self.data_dict[key] = tempdict[key]
+            #         tempdict.pop(key,None)
+            # self.data_dict.update(tempdict)
             self.data_dict.update(tempdict)
-            
-            for keys in self.data_dict:
-                self.test_list.append(keys)
+            for key in self.data_dict:
+                if 'Title' not in self.data_dict[key].keys():
+                    self.data_dict[key]['Title'] = key
+                    self.test_list.append(self.data_dict[key]['Title'])
+                else:
+                    self.test_list.append(self.data_dict[key]['Title'])
             self.colorList = ['#000000' for x in range(len(self.test_list))]
             for i in range(len(self.test_list)):
                 group_list.append(str(i+1))
             self.tableWidget.setRowCount(len(self.test_list))
             self.tableWidget.setHorizontalHeaderLabels(['Test Name','Group #','Line Color','Delete'])
-            i = 0         
+            self.tableWidget.setVerticalHeaderLabels(self.data_dict.keys())
+            i = 0
             for k in self.test_list:
-
                 self.tableWidget.setItem(i,0,QtWidgets.QTableWidgetItem(str(k)))
                 header = self.tableWidget.horizontalHeader()
                 header.setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeToContents)
@@ -85,6 +90,9 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         namedel = self.tableWidget.item(index.row(),0).text()
         self.data_dict.pop(namedel,None)
         self.tableWidget.removeRow(index.row())
+    def titleUpdate(self,row):
+        self.data_dict[self.tableWidget.verticalHeaderItem(row).text()]['Title'] = self.tableWidget.item(row, 0).text()
+
         
 ##Function for exporting data to Excel        
 #    def exportexcel(self):
@@ -101,22 +109,14 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         directory = QtWidgets.QFileDialog.getSaveFileName(self,"Select Where to Save")
         if directory:
             if self.data_dict:
-                for keys in self.data_dict:
-                    print(self.data_dict[keys]['Color'])
                 group_list = []
                 bokehTabs = []
                 avgDict = {}
                 testName =[]
                 testLen = len(self.data_dict.keys())
-                k = 0
-                for keys in self.data_dict:
-                    if keys != self.tableWidget.item(k,0).text():                     
-                       self.data_dict[self.tableWidget.item(k,0).text()] = self.data_dict.pop(keys)
-                       
-                    k+=1
-                for i in range(testLen):
-                    self.data_dict[self.tableWidget.item(i,0).text()]['Title'] = self.tableWidget.item(i,0).text()
-                    self.data_dict[self.tableWidget.item(i,0).text()]['Group'] = int(self.tableWidget.cellWidget(i,1).currentText())
+                for i in range(0,testLen):
+                    self.data_dict[self.tableWidget.verticalHeaderItem(i).text()]['Title'] = self.tableWidget.item(i,0).text()
+                    self.data_dict[self.tableWidget.verticalHeaderItem(i).text()]['Group'] = int(self.tableWidget.cellWidget(i,1).currentText())
                 filtersize = self.filterBox.currentText()
                 plotTitle = self.titlebox.text()
                 for key in self.data_dict:
