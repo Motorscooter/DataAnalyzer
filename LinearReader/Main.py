@@ -27,18 +27,17 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
         self.filterBox.addItems(filterlist)
         self.openFile.clicked.connect(self.browse_folder)
         self.graphbtn.clicked.connect(self.report)
-#        self.export_2.clicked.connect(self.exportexcel)
+#       self.export_2.clicked.connect(self.exportexcel)
         self.tableWidget.cellChanged.connect(self.titleUpdate)
         self.data_dict = {}
 
     def browse_folder(self):
-        self.directory = QtWidgets.QFileDialog.getExistingDirectory(self,"Pick a Folder")        
+        self.directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Pick a Folder")
         if self.directory:
             self.tableWidget.clear()
             self.test_list = []
             tempdict = {}
             group_list = []
-
             tempdict = fileRead(self.directory)
             # for key in tempdict:
             #     if key in self.data_dict.keys():
@@ -56,7 +55,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
             for i in range(len(self.test_list)):
                 group_list.append(str(i+1))
             self.tableWidget.setRowCount(len(self.test_list))
-            self.tableWidget.setHorizontalHeaderLabels(['Test Name','Group #','Line Color','Delete'])
+            self.tableWidget.setHorizontalHeaderLabels(['Test Name', 'Group #', 'Line Color', 'Delete'])
             self.tableWidget.setVerticalHeaderLabels(self.data_dict.keys())
             i = 0
             for k in self.test_list:
@@ -70,31 +69,32 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                 self.btncolor = QtWidgets.QPushButton()
                 self.btncolor.clicked.connect(self.clickedColor)
                 self.btncolor.setStyleSheet("background-color: black")
-                self.tableWidget.setCellWidget(i,2,self.btncolor)
+                self.tableWidget.setCellWidget(i, 2, self.btncolor)
                 self.btnDel = QtWidgets.QPushButton()
                 self.btnDel.clicked.connect(self.deleteData)
                 self.btnDel.setText("Remove")
-                self.tableWidget.setCellWidget(i,3,self.btnDel)
+                self.tableWidget.setCellWidget(i, 3, self.btnDel)
                 i +=1
-#Button function for selection color with color picker. 
+# Button function for selection color with color picker.
     def clickedColor(self):
         button = QtWidgets.qApp.focusWidget()
         color = QtWidgets.QColorDialog.getColor()
         button.setStyleSheet("QWidget { background-color: %s}" % color.name())
         index = self.tableWidget.indexAt(button.pos())
-        self.data_dict[self.tableWidget.item(index.row(),0).text()]['Color'] = color.name()
-#Delete unwanted files from dictionary. (Not from folder)        
+        self.data_dict[self.tableWidget.item(index.row(), 0).text()]['Color'] = color.name()
+# Delete unwanted files from dictionary. (Not from folder)
     def deleteData(self):
         button = QtWidgets.qApp.focusWidget()
         index = self.tableWidget.indexAt(button.pos())
-        namedel = self.tableWidget.item(index.row(),0).text()
-        self.data_dict.pop(namedel,None)
+        namedel = self.tableWidget.item(index.row(), 0).text()
+        self.data_dict.pop(namedel, None)
         self.tableWidget.removeRow(index.row())
-    def titleUpdate(self,row):
+
+    def titleUpdate(self, row):
         self.data_dict[self.tableWidget.verticalHeaderItem(row).text()]['Title'] = self.tableWidget.item(row, 0).text()
 
         
-##Function for exporting data to Excel        
+# Function for exporting data to Excel
 #    def exportexcel(self):
 #        i = 0
 #        savedirectory = QtWidgets.QFileDialog.getExistingDirectory(self,"Save Excel File")
@@ -104,9 +104,9 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
 #            i += 1
 #        exportToexcel(self.data_dict,self.data,savedirectory,self.titlebox.text())
         
-#Fucntion for graphing data                   
+# Fucntion for graphing data
     def report(self):
-        directory = QtWidgets.QFileDialog.getSaveFileName(self,"Select Where to Save")
+        directory = QtWidgets.QFileDialog.getSaveFileName(self, "Select Where to Save")
         if directory:
             if self.data_dict:
                 group_list = []
@@ -114,15 +114,15 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                 avgDict = {}
                 testName =[]
                 testLen = len(self.data_dict.keys())
-                for i in range(0,testLen):
-                    self.data_dict[self.tableWidget.verticalHeaderItem(i).text()]['Title'] = self.tableWidget.item(i,0).text()
+                for i in range(0, testLen):
+                    self.data_dict[self.tableWidget.verticalHeaderItem(i).text()]['Title'] = self.tableWidget.item(i, 0).text()
                     self.data_dict[self.tableWidget.verticalHeaderItem(i).text()]['Group'] = int(self.tableWidget.cellWidget(i,1).currentText())
                 filtersize = self.filterBox.currentText()
                 plotTitle = self.titlebox.text()
                 for key in self.data_dict:
                     testName.append(key)
                 for i in range(len(self.test_list)):
-                    group_list.append(self.tableWidget.cellWidget(i,1).currentText())
+                    group_list.append(self.tableWidget.cellWidget(i, 1).currentText())
 
                 if filtersize != 'Raw':
                     for key in self.data_dict:
@@ -141,7 +141,7 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                         avdLegend.append((self.data_dict[key]['Title'],[accelvdisp]))
                     avdLegend = Legend(items = avdLegend, location=(0,0))
                     avdLegend.click_policy = "mute"
-                    avd.add_layout(avdLegend,'right')
+                    avd.add_layout(avdLegend, 'right')
                     avd.legend.orientation = "vertical"
                     avd.legend.padding = 1
                     avd.xaxis.axis_label = "Displacement (mm)"
@@ -177,11 +177,11 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     cur = figure(width = 1200, height = 600, title = plotTitle)
                     curLegend = []
                     for key in self.data_dict:
-                        current = cur.line(self.data_dict[key]['Current']['XData'],self.data_dict[key]['Current']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
-                        curLegend.append((self.data_dict[key]['Title'],[current]))
-                    curLegend = Legend(items = curLegend, location=(0,0))
+                        current = cur.line(self.data_dict[key]['Current']['XData'], self.data_dict[key]['Current']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        curLegend.append((self.data_dict[key]['Title'], [current]))
+                    curLegend = Legend(items = curLegend, location=(0, 0))
                     curLegend.click_policy = "mute"
-                    cur.add_layout(curLegend,'right')
+                    cur.add_layout(curLegend, 'right')
                     cur.legend.orientation = "vertical"
                     cur.legend.padding = 1
                     cur.xaxis.axis_label = "Time (mSec)"
@@ -195,11 +195,11 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     vol = figure(width = 1200, height = 600, title = plotTitle)
                     volLegend = []
                     for key in self.data_dict:
-                        voltage = vol.line(self.data_dict[key]['Voltage']['XData'],self.data_dict[key]['Voltage']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
-                        volLegend.append((self.data_dict[key]['Title'],[voltage]))
-                    volLegend = Legend(items = volLegend, location=(0,0))
+                        voltage = vol.line(self.data_dict[key]['Voltage']['XData'], self.data_dict[key]['Voltage']['RawYData'],line_color = self.data_dict[key]['Color'],line_width = 4, alpha = 1, muted_color = self.data_dict[key]['Color'],muted_alpha = 0)
+                        volLegend.append((self.data_dict[key]['Title'], [voltage]))
+                    volLegend = Legend(items = volLegend, location=(0, 0))
                     volLegend.click_policy = "mute"
-                    vol.add_layout(volLegend,'right')
+                    vol.add_layout(volLegend, 'right')
                     vol.legend.orientation = "vertical"
                     vol.legend.padding = 1
                     vol.xaxis.axis_label = "Time (mSec)"
@@ -254,10 +254,10 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     legendAVT = []
                     legendAVD = []
                     for key in avgDict:
-                         a = avgavt.line(avgDict[key]['avgTime'],avgDict[key]['avgAccel'],line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
-                         b = avgavd.line(avgDict[key]['avgDisp'],avgDict[key]['avgAccel'],line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
-                         legendAVT.append((avgDict[key]['Title'],[a]))
-                         legendAVD.append((avgDict[key]['Title'],[b]))
+                         a = avgavt.line(avgDict[key]['avgTime'], avgDict[key]['avgAccel'], line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
+                         b = avgavd.line(avgDict[key]['avgDisp'], avgDict[key]['avgAccel'], line_color = avgDict[key]['Color'], line_width = 4, alpha = 1, muted_color = avgDict[key]['Color'],muted_alpha=0)
+                         legendAVT.append((avgDict[key]['Title'], [a]))
+                         legendAVD.append((avgDict[key]['Title'], [b]))
                     Tlegend = Legend(items = legendAVT, location=(0,0))
                     Tlegend.click_policy = "mute"
                     avgavt.add_layout(Tlegend,'right')   
@@ -265,10 +265,10 @@ class LinearApp(QtWidgets.QMainWindow, Mainwindow.Ui_mainwindow):
                     avgavt.legend.padding = 1
                     avgavt.xaxis.axis_label = "Time (mSec)"
                     avgavt.yaxis.axis_label = "Acceleration (g's)"
-                    avgTTab =  Panel(child=avgavt, title='Average Acceleration vs. Time')
+                    avgTTab = Panel(child=avgavt, title='Average Acceleration vs. Time')
                     bokehTabs.append(avgTTab)
                     
-                    Dlegend = Legend(items = legendAVD, location=(0,0))
+                    Dlegend = Legend(items = legendAVD, location=(0, 0))
                     Dlegend.click_policy = "mute"
                     avgavd.add_layout(Dlegend,'right')   
                     avgavd.legend.orientation = "vertical"
